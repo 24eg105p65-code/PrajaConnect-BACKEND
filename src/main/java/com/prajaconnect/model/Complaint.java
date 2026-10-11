@@ -1,51 +1,52 @@
 package com.prajaconnect.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/** Field names match src/types/index.ts (Complaint) exactly. */
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Complaint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    public String id;                       // e.g. PC-2026-0001
 
-    @NotBlank
-    private String title;
-
+    public String title;
     @Column(length = 2000)
-    private String description;
+    public String description;
+    public String category;
+    public String village;
+    public String mandal;
+    public String district;
+    public String imageName;
 
-    private String category;
-    private String department;
-    private String location;
-    private String priority = "MEDIUM";   // LOW, MEDIUM, HIGH
-    private String status = "PENDING";    // PENDING, IN_PROGRESS, RESOLVED
-    private String citizenName;
-    private String citizenPhone;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    public String citizenId;
+    public String citizenName;
+    public String status;
+    public String departmentId;
+    public String staffId;
+    public String createdAt;
+    public String updatedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
-    public String getPriority() { return priority; }
-    public void setPriority(String priority) { this.priority = priority; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public String getCitizenName() { return citizenName; }
-    public void setCitizenName(String citizenName) { this.citizenName = citizenName; }
-    public String getCitizenPhone() { return citizenPhone; }
-    public void setCitizenPhone(String citizenPhone) { this.citizenPhone = citizenPhone; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "complaint_history", joinColumns = @JoinColumn(name = "complaint_id"))
+    @OrderColumn(name = "idx")
+    public List<HistoryEntry> history = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "complaint_admin_notes", joinColumns = @JoinColumn(name = "complaint_id"))
+    @OrderColumn(name = "idx")
+    public List<AdminNote> adminNotes = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "complaint_evidence", joinColumns = @JoinColumn(name = "complaint_id"))
+    @OrderColumn(name = "idx")
+    @Column(name = "evidence_name")
+    public List<String> evidence = new ArrayList<>();
+
+    @Embedded
+    public Feedback feedback;
 }
